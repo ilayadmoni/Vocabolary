@@ -11,8 +11,6 @@
         .backface-hidden { backface-visibility: hidden; }
         .rotate-y-180 { transform: rotateY(180deg); }
         body { background-color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
-        
-        /* Hide scrollbar for horizontal scrolling menus */
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
@@ -49,7 +47,6 @@
         <!-- Week Selector -->
         <div class="mb-6 md:mb-8 w-full overflow-hidden">
             <h3 class="text-xs md:text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2 md:mb-3 px-1">בחר שבוע לתרגול:</h3>
-            <!-- Scrollable container for mobile -->
             <div class="flex overflow-x-auto gap-2 pb-2 hide-scrollbar w-full" id="week-buttons">
                 <!-- Injected via JS -->
             </div>
@@ -60,15 +57,31 @@
             <div class="flex flex-col items-center w-full max-w-2xl mx-auto mt-4 md:mt-8">
                 <div class="text-xs md:text-sm text-gray-500 mb-3 md:mb-4 font-medium" id="fc-counter">כרטיסיה 1 מתוך 200</div>
                 
-                <div class="relative w-full h-64 md:h-80 cursor-pointer perspective-1000" onclick="toggleFlip()">
+                <div class="relative w-full h-72 md:h-96 cursor-pointer perspective-1000" onclick="toggleFlip()">
                     <div id="fc-card" class="w-full h-full transform-style-3d shadow-lg hover:shadow-xl transition-shadow rounded-2xl">
+                        
+                        <!-- Front (English) -->
                         <div class="absolute w-full h-full backface-hidden bg-white rounded-2xl border border-gray-100 flex flex-col items-center justify-center p-6 md:p-8 text-center">
                             <span class="text-gray-400 text-xs md:text-sm absolute top-3 md:top-4 left-4">לחץ כדי להפוך</span>
-                            <h2 id="fc-en" class="text-3xl md:text-5xl font-bold text-gray-800 break-words w-full px-2" dir="ltr">Word</h2>
+                            
+                            <div class="flex items-center justify-center gap-3 md:gap-4 mb-2">
+                                <button onclick="playAudio(event, 'fc-en-text')" class="p-3 bg-blue-50 text-blue-600 rounded-full hover:bg-blue-100 transition-colors" title="השמע מילה">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+                                </button>
+                                <h2 id="fc-en-text" class="text-4xl md:text-5xl font-bold text-gray-800 break-words" dir="ltr">Word</h2>
+                            </div>
                         </div>
+
+                        <!-- Back (Hebrew + Example) -->
                         <div class="absolute w-full h-full backface-hidden bg-blue-50 rounded-2xl border border-blue-100 flex flex-col items-center justify-center p-6 md:p-8 text-center rotate-y-180">
                             <span class="text-blue-300 text-xs md:text-sm absolute top-3 md:top-4 right-4">לחץ כדי להפוך</span>
-                            <h2 id="fc-he" class="text-2xl md:text-4xl font-bold text-blue-900 break-words w-full px-2" dir="rtl">Translation</h2>
+                            <h2 id="fc-he" class="text-2xl md:text-4xl font-bold text-blue-900 break-words w-full px-2 mb-4" dir="rtl">Translation</h2>
+                            
+                            <div class="mt-2 p-4 bg-white/60 rounded-xl border border-blue-100/50 w-full max-w-md">
+                                <p class="text-xs md:text-sm text-gray-500 font-semibold mb-1" dir="rtl">משפט לדוגמה:</p>
+                                <p id="fc-example" class="text-sm md:text-base text-gray-800 italic" dir="ltr">Example sentence goes here.</p>
+                            </div>
+
                             <span id="fc-week" class="mt-4 md:mt-6 px-3 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">שבוע 1</span>
                         </div>
                     </div>
@@ -95,8 +108,13 @@
                      <span id="quiz-score">ניקוד: 0</span>
                 </div>
 
-                <div class="w-full bg-white rounded-2xl shadow-md p-6 md:p-8 text-center border border-gray-100 mb-4 md:mb-6">
-                    <h2 id="quiz-en" class="text-3xl md:text-4xl font-bold text-gray-800 break-words" dir="ltr">Word</h2>
+                <div class="w-full bg-white rounded-2xl shadow-md p-6 md:p-8 text-center border border-gray-100 mb-4 md:mb-6 flex flex-col items-center justify-center">
+                    <div class="flex items-center justify-center gap-3">
+                        <button onclick="playAudio(event, 'quiz-en-text')" class="p-2 bg-blue-50 text-blue-600 rounded-full hover:bg-blue-100 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+                        </button>
+                        <h2 id="quiz-en-text" class="text-3xl md:text-4xl font-bold text-gray-800 break-words" dir="ltr">Word</h2>
+                    </div>
                 </div>
 
                 <div id="quiz-options" class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 w-full">
@@ -121,7 +139,7 @@
                     <table class="w-full text-right" dir="rtl">
                         <thead class="bg-gray-50 border-b border-gray-100 text-gray-600">
                             <tr>
-                                <th class="py-3 px-4 md:py-4 md:px-6 font-semibold text-sm md:text-base min-w-[120px]">מילה באנגלית</th>
+                                <th class="py-3 px-4 md:py-4 md:px-6 font-semibold text-sm md:text-base min-w-[200px]">מילה באנגלית + משפט לדוגמה</th>
                                 <th class="py-3 px-4 md:py-4 md:px-6 font-semibold text-sm md:text-base min-w-[150px]">פירוש בעברית</th>
                                 <th class="py-3 px-4 md:py-4 md:px-6 font-semibold text-center text-sm md:text-base w-20 md:w-24 whitespace-nowrap">שבוע</th>
                             </tr>
@@ -136,212 +154,242 @@
     </main>
 
     <script>
-        const rawData = `1|Abrupt|פתאומי; בוטה.
-1|Capricious|גחמני, קפריזי.
-1|Allege|לטעון (בדרך כלל ללא הוכחה).
-1|Meticulous|קפדני מאוד.
-1|Nebulous|מעורפל.
-1|Rant|להתרעם, "לחפור" בכעס.
-1|Assert|לעמוד על שלך, להצהיר בתוקף.
-1|Rancor|טינה, איבה.
-1|Blunt|בוטה, ישיר מאוד.
-1|Tenacious|עקשן, דבק במטרה.
-1|Narrow down|לצמצם אפשרויות.
-1|Flick through|לדפדף במהירות.
-1|Stumble across|להיתקל במקרה.
-1|Brush up on|לרענן ידע.
-1|Come around to|להשתכנע בסוף.
-1|Bark up the wrong tree|לחפש במקום הלא נכון.
-1|Not have a leg to stand on|אין לו על מה להסתמך.
-1|Not to see the wood for the trees|מרוב עצים לא רואים את היער.
-1|Ring a bell|נשמע מוכר.
-1|Split hairs|להתעסק בקטנות.
-2|Cogent|משכנע, ענייני.
-2|Ambiguous|דו-משמעי, מעורפל.
-2|Ubiquitous|נמצא בכל מקום.
-2|Boast|להתרברב.
-2|Denounce|להוקיע, לגנות.
-2|Convey|להעביר (מסר/מידע).
-2|Ostensible|לכאורה, כביכול.
-2|Contradict|לסתור.
-2|Novel|חדשני.
-2|Endure|לשאת, להחזיק מעמד.
-2|Come up with|להמציא רעיון/פתרון.
-2|Mull over|להרהר, לשקול.
-2|Wear off|להתפוגג, להיחלש.
-2|Crop up|לצוץ פתאום.
-2|Dive in|לקפוץ למים, להתחיל בהתלהבות.
-2|Take stock of|לעשות הערכת מצב.
-2|At the drop of a hat|ללא היסוס, מיד.
-2|By the skin of your teeth|בקושי רב.
-2|In the nick of time|ברגע האחרון ממש.
-2|Once in a blue moon|לעיתים רחוקות מאוד.
-3|Inscrutable|בלתי ניתן לפענוח.
-3|Staggering|מדהים, מטלטל.
-3|Ephemeral|חולף, זמני.
-3|Tolerant|סובלני.
-3|Myriad|אינספור, המון.
-3|Nefarious|מרושע.
-3|Salient|בולט, עיקרי.
-3|Unsurmountable|שלא ניתן להתגבר עליו.
-3|Disparage|לזלזל.
-3|Apprehensive|חושש, חרד.
-3|Kick off|להתחיל, להזניק.
-3|Knock off|לסיים יום עבודה.
-3|Knuckle down|להתחיל לעבוד ברצינות.
-3|Chip in|לתרום, להשתתף במאמץ.
-3|Lie ahead|מצפה לנו בעתיד.
-3|On the spur of the moment|בדחף של הרגע.
-3|Hit the nail on the head|לקלוע בול.
-3|Follow your nose|לסמוך על האינסטינקטים.
-3|Lose your bearings|לאבד כיוון/צפון.
-3|Off the beaten track|מחוץ למסלול המוכר.
-4|Disgruntled|ממורמר, לא מרוצה.
-4|Intransigent|בלתי מתפשר.
-4|Get the ball rolling|להניע תהליך.
-4|Accountable|אחראי (דיווחִי).
-4|Persist|להתמיד.
-4|Amend|לתקן, לשפר (חוק/טקסט).
-4|Substitute|להחליף; תחליף.
-4|Refine|ללטש, לשכלל.
-4|Sustain|לשמר, לתמוך.
-4|Riveting|מרתק.
-4|Set out|לצאת לדרך; להציג תוכנית.
-4|Take on|לקחת על עצמך (משימה/אחריות).
-4|Wind down|להירגע, להוריד הילוך.
-4|Creep up on|להתגנב אל.
-4|Go astray|ללכת לאיבוד; לסטות מהדרך.
-4|Stop dead in your tracks|לעצור במקום בפתאומיות.
-4|Keep posted|לעדכן באופן שוטף.
-4|Speak volumes|אומר דרשני, מעיד על הרבה.
-4|Throw in the towel|להרים ידיים, לוותר.
-4|Draw the short straw|להפסיד/לקבל את המשימה הגרועה.
-5|Accumulation|הצטברות.
-5|Plausible|סביר, מתקבל על הדעת.
-5|Discriminate|להפלות; להבחין בין.
-5|Ingenious|גאוני.
-5|Ponder|להרהר.
-5|Dubious|מפוקפק, מוטל בספק.
-5|Prejudiced|בעל דעות קדומות.
-5|Estimate|להעריך.
-5|Contemplate|לשקול, להרהר.
-5|To make ends meet|לסגור את החודש (כלכלית).
-5|Turn down|לסרב; להנמיך.
-5|Hold back|לעכב; להסתיר רגשות.
-5|Give someone a heads up|לעדכן מראש.
-5|Come across|להיתקל ב-; להצטייר כ-.
-5|Slip up|לטעות.
-5|Prop up|לתמוך, להחזיק.
-5|Wear down|לשחוק, להתיש.
-5|Make up|להמציא; להשלים (אחרי ריב).
-5|Burst out|להתפרץ (בצחוק/בכי).
-5|Carry on|להמשיך.
-6|Biased|מוטה, משוחד.
-6|Presumptuous|יהיר, חוצפן.
-6|Grasp|לתפוס, להבין.
-6|Embrace|לחבק; לקבל מרצון.
-6|Speculate|לשער.
-6|Deliberate|מכוון; לדון בכובד ראש.
-6|Hunch|תחושת בטן.
-6|Conscientious|מצפוני, יסודי.
-6|Ignorant|בור, חסר ידע.
-6|Cram|לדחוס (ללמוד למבחן ברגע האחרון).
-6|Sort out|לסדר, לפתור.
-6|Tell off|לנזוף.
-6|Hands down|ללא ספק.
-6|Put up with|להשלים עם, לסבול משהו.
-6|Point out|להצביע על, לציין.
-6|Jump the gun|לפעול בחיפזון, "לקפוץ בראש".
-6|Off the hook|לצאת מהתסבוכת/מהאחריות.
-6|To cost an arm and a leg|עולה הון תועפות.
-6|To cut corners|לעגל פינות.
-6|Add insult to injury|להוסיף חטא על פשע.
-7|Inattentive|חסר קשב.
-7|Act out|להחצין רגשות (בדרך כלל בצורה שלילית).
-7|Deteriorate|להידרדר.
-7|Revise|לעשות חזרה; לתקן.
-7|Distort|לעוות.
-7|Punctual|דייקן.
-7|Eternal|נצחי.
-7|Obsolete|מיושן, שכבר לא משתמשים בו.
-7|Bite the bullet|לבלוע את הגלולה המרה.
-7|Interim|זמני, תקופת ביניים.
-7|Break the mold|לשבור את המוסכמות.
-7|Reinvent the wheel|להמציא את הגלגל מחדש.
-7|Stick to your guns|לעמוד על שלך.
-7|Tools of the trade|כלי העבודה המקצועיים.
-7|Turn over a new leaf|לפתוח דף חדש.
-7|Beat around the bush|ללכת סחור-סחור.
-7|Break a leg|בהצלחה.
-7|Call it a day|לסיים את העבודה להיום.
-7|Get out of hand|לצאת משליטה.
-7|Under the weather|לא מרגיש טוב.
-8|Aversion|סלידה.
-8|Contemporary|עכשווי, בן זמננו.
-8|Indulge|להתפנק; להתמכר ל-.
-8|Subsequent|שבא לאחר מכן.
-8|Bewildered|מבולבל מאוד.
-8|Prior|קודם.
-8|Pervasive|מופשט, חודר לכל מקום.
-8|Provisional|זמני, מותנה.
-8|Timely|בזמן המתאים.
-8|Redundant|מיותר, עודף.
-8|Put off|לדחות.
-8|Bear with|להתאזר בסבלנות כלפי מישהו.
-8|Break away|להתנתק.
-8|Bring about|לגרום ל-, להביא לידי.
-8|Call off|לבטל.
-8|Cut to the chase|להגיע לעיקר.
-8|Speak of the devil|מדברים על החמור.
-8|Cut somebody some slack|לוותר למישהו, לא להחמיר איתו.
-8|When pigs fly|כשחזירים יעופו (אף פעם).
-8|Back to the drawing board|חזרה לשולחן השרטוטים.
-9|Accelerate|להאיץ.
-9|Articulate|רהוט; להביע בבירור.
-9|Surpassed|עלה על, עקף.
-9|Gnaw at|לכרסם ב-.
-9|Plead|להתחנן; לטעון (במשפט).
-9|Dismiss|לפטר; לפסול/לבטל.
-9|Touch base|ליצור קשר לעדכון קצר.
-9|Inept|חסר כישרון, כושל.
-9|Fumble|לגשש; להתבלבל.
-9|Drop in|לקפוץ לביקור.
-9|Carry out|לבצע.
-9|Catch up|להשלים פערים.
-9|The last straw|הקש ששבר את גב הגמל.
-9|Come forward|להתייצב, להציע עזרה/מידע.
-9|See eye to eye|להסכים לחלוטין.
-9|A hot potato|נושא רגיש/שנוי במחלוקת.
-9|To drift apart|להתרחק (חברתית).
-9|Let the cat out of the bag|לגלות סוד.
-9|To grapple with|להתמודד/להיאבק עם.
-9|To stick up for|להגן על מישהו/משהו.
-10|Futile|חסר תועלת.
-10|Impeccable|ללא דופי, מושלם.
-10|Spill the beans|לגלות סוד.
-10|Through thick and thin|באש ובמים.
-10|Pernicious|מזיק מאוד, הרסני.
-10|Route|מסלול.
-10|Pedestrian|הולך רגל; משעמם/בנאלי.
-10|Deviate|לסטות.
-10|Discrepancy|אי-התאמה, פער.
-10|Illegible|לא קריא.
-10|Cut off|לנתק.
-10|Draw in|למשוך פנימה/לערב.
-10|Draw out|להאריך/למשוך זמן.
-10|Rack up|לצבור (נקודות/חובות).
-10|Drop out|לנשור (מלימודים).
-10|A last resort|מוצא אחרון.
-10|To bite off more than you can chew|לקפוץ מעל הפופיק.
-10|Blessing in disguise|מעז יצא מתוק.
-10|To give the benefit of the doubt|ליהנות מהספק.
-10|To take it with a grain of salt|לקחת בעירבון מוגבל.`;
+        // Speech Synthesis Function
+        function speakWord(text) {
+            if ('speechSynthesis' in window) {
+                // Cancel any ongoing speech to avoid queue buildup
+                window.speechSynthesis.cancel();
+                
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.9; // Slightly slower for clear pronunciation
+                window.speechSynthesis.speak(utterance);
+            } else {
+                alert("הדפדפן שלך לא תומך בהשמעה קולית.");
+            }
+        }
 
+        // Play audio from buttons and stop event propagation (so flashcard doesn't flip)
+        function playAudio(event, elementIdOrText, isDirectText = false) {
+            event.stopPropagation();
+            const text = isDirectText ? elementIdOrText : document.getElementById(elementIdOrText).innerText;
+            speakWord(text);
+        }
+
+        // Data array including Example Sentences
+        const rawData = `1|Abrupt|פתאומי; בוטה.|The car came to an abrupt stop when the light turned red.
+1|Capricious|גחמני, קפריזי.|She is known for her capricious behavior, changing her mind constantly.
+1|Allege|לטעון (בדרך כלל ללא הוכחה).|The prosecutor will allege that he was at the scene of the crime.
+1|Meticulous|קפדני מאוד.|He is extremely meticulous about keeping his desk organized.
+1|Nebulous|מעורפל.|The instructions were too nebulous for us to understand clearly.
+1|Rant|להתרעם, "לחפור" בכעס.|He went on a 20-minute rant about the terrible service at the restaurant.
+1|Assert|לעמוד על שלך, להצהיר בתוקף.|You need to assert yourself more in meetings to be heard.
+1|Rancor|טינה, איבה.|Even after the divorce, they spoke without rancor.
+1|Blunt|בוטה, ישיר מאוד.|To be blunt, your presentation was not very good.
+1|Tenacious|עקשן, דבק במטרה.|She is a tenacious athlete who never gives up during a game.
+1|Narrow down|לצמצם אפשרויות.|We managed to narrow down the list of candidates to three people.
+1|Flick through|לדפדף במהירות.|I like to flick through a magazine while waiting at the dentist.
+1|Stumble across|להיתקל במקרה.|I managed to stumble across some old photographs in the attic.
+1|Brush up on|לרענן ידע.|I need to brush up on my Spanish before going to Madrid.
+1|Come around to|להשתכנע בסוף.|He didn't like the idea at first, but he'll come around to it eventually.
+1|Bark up the wrong tree|לחפש במקום הלא נכון.|If he thinks I have his money, he is barking up the wrong tree.
+1|Not have a leg to stand on|אין לו על מה להסתמך.|Without any proof, you don't have a leg to stand on in court.
+1|Not to see the wood for the trees|מרוב עצים לא רואים את היער.|He is focusing so much on the tiny details that he can't see the wood for the trees.
+1|Ring a bell|נשמע מוכר.|The name rings a bell, but I can't remember where we met.
+1|Split hairs|להתעסק בקטנות.|Let's not split hairs over exactly whose fault it was; let's just fix it.
+2|Cogent|משכנע, ענייני.|She presented a very cogent argument for lowering taxes.
+2|Ambiguous|דו-משמעי, מעורפל.|His answer was so ambiguous that nobody knew what he really meant.
+2|Ubiquitous|נמצא בכל מקום.|Smartphones have become ubiquitous in modern society.
+2|Boast|להתרברב.|He likes to boast about how much money he makes.
+2|Denounce|להוקיע, לגנות.|The government was quick to denounce the violence.
+2|Convey|להעביר (מסר/מידע).|Words cannot convey how grateful I am for your help.
+2|Ostensible|לכאורה, כביכול.|Their ostensible goal was peace, but they secretly prepared for war.
+2|Contradict|לסתור.|The witness's statement seemed to contradict the video evidence.
+2|Novel|חדשני.|Using drones to deliver pizza is quite a novel idea.
+2|Endure|לשאת, להחזיק מעמד.|They had to endure extreme weather conditions during the expedition.
+2|Come up with|להמציא רעיון/פתרון.|We need to come up with a better plan to save money.
+2|Mull over|להרהר, לשקול.|I need a few days to mull over your job offer before deciding.
+2|Wear off|להתפוגג, להיחלש.|The effects of the painkillers will start to wear off soon.
+2|Crop up|לצוץ פתאום.|Unexpected problems always seem to crop up at the last minute.
+2|Dive in|לקפוץ למים, להתחיל בהתלהבות.|When the pizza arrived, we didn't wait; we just dived right in.
+2|Take stock of|לעשות הערכת מצב.|After the fire, they had to take stock of the damage.
+2|At the drop of a hat|ללא היסוס, מיד.|She is always ready to travel at the drop of a hat.
+2|By the skin of your teeth|בקושי רב.|He managed to pass the difficult exam by the skin of his teeth.
+2|In the nick of time|ברגע האחרון ממש.|The ambulance arrived just in the nick of time.
+2|Once in a blue moon|לעיתים רחוקות מאוד.|I eat fast food once in a blue moon because I prefer healthy meals.
+3|Inscrutable|בלתי ניתן לפענוח.|The boss had an inscrutable expression on his face during the meeting.
+3|Staggering|מדהים, מטלטל.|The hurricane caused a staggering amount of damage.
+3|Ephemeral|חולף, זמני.|Fame in the modern era is often highly ephemeral.
+3|Tolerant|סובלני.|Our school is very tolerant of different cultures and religions.
+3|Myriad|אינספור, המון.|There are a myriad of reasons why people choose to live in the city.
+3|Nefarious|מרושע.|The hacker was arrested for his nefarious activities online.
+3|Salient|בולט, עיקרי.|Please summarize the salient points of the long report.
+3|Unsurmountable|שלא ניתן להתגבר עליו.|The language barrier seemed like an unsurmountable obstacle at first.
+3|Disparage|לזלזל.|You shouldn't disparage her hard work just because you disagree with her.
+3|Apprehensive|חושש, חרד.|I am a bit apprehensive about flying in such bad weather.
+3|Kick off|להתחיל, להזניק.|The director will kick off the meeting with a short speech.
+3|Knock off|לסיים יום עבודה.|What time do you usually knock off work on Fridays?
+3|Knuckle down|להתחיל לעבוד ברצינות.|Exams are next week, so it's time to knuckle down and study.
+3|Chip in|לתרום, להשתתף במאמץ.|If everyone chips in a few dollars, we can buy her a nice gift.
+3|Lie ahead|מצפה לנו בעתיד.|No one knows exactly what challenges lie ahead of us.
+3|On the spur of the moment|בדחף של הרגע.|We packed our bags and drove to the beach on the spur of the moment.
+3|Hit the nail on the head|לקלוע בול.|You really hit the nail on the head when you identified the main problem.
+3|Follow your nose|לסמוך על האינסטינקטים.|If you're not sure which way to go, just follow your nose.
+3|Lose your bearings|לאבד כיוון/צפון.|It's easy to lose your bearings in this huge, complicated building.
+3|Off the beaten track|מחוץ למסלול המוכר.|They found a tiny, beautiful village completely off the beaten track.
+4|Disgruntled|ממורמר, לא מרוצה.|The disgruntled employee complained to the manager about his salary.
+4|Intransigent|בלתי מתפשר.|The union remained intransigent in their demand for higher wages.
+4|Get the ball rolling|להניע תהליך.|Let's schedule a meeting tomorrow to get the ball rolling on this project.
+4|Accountable|אחראי (דיווחִי).|Politicians must be held accountable for their actions.
+4|Persist|להתמיד.|If the symptoms persist for more than a week, see a doctor.
+4|Amend|לתקן, לשפר (חוק/טקסט).|The committee voted to amend the existing environmental laws.
+4|Substitute|להחליף; תחליף.|You can substitute chicken for beef in this recipe.
+4|Refine|ללטש, לשכלל.|The engineers are trying to refine the software to make it run faster.
+4|Sustain|לשמר, לתמוך.|He found it difficult to sustain his energy throughout the marathon.
+4|Riveting|מרתק.|The documentary about deep-sea exploration was absolutely riveting.
+4|Set out|לצאת לדרך; להציג תוכנית.|They set out on a journey across the desert early in the morning.
+4|Take on|לקחת על עצמך (משימה/אחריות).|She decided to take on the difficult task of organizing the festival.
+4|Wind down|להירגע, להוריד הילוך.|After a stressful day, I like to wind down by reading a book.
+4|Creep up on|להתגנב אל.|Old age tends to creep up on you when you least expect it.
+4|Go astray|ללכת לאיבוד; לסטות מהדרך.|Without proper guidance, teenagers can easily go astray.
+4|Stop dead in your tracks|לעצור במקום בפתאומיות.|The sudden loud noise made him stop dead in his tracks.
+4|Keep posted|לעדכן באופן שוטף.|Please keep me posted on any new developments in the project.
+4|Speak volumes|אומר דרשני, מעיד על הרבה.|His refusal to answer the question speaks volumes about his guilt.
+4|Throw in the towel|להרים ידיים, לוותר.|After trying for five years, he finally threw in the towel and quit.
+4|Draw the short straw|להפסיד/לקבל את המשימה הגרועה.|I drew the short straw and had to clean the kitchen while everyone else rested.
+5|Accumulation|הצטברות.|There was a massive accumulation of snow on the roof.
+5|Plausible|סביר, מתקבל על הדעת.|His excuse for being late sounded plausible enough.
+5|Discriminate|להפלות; להבחין בין.|It is illegal for employers to discriminate on the basis of race or gender.
+5|Ingenious|גאוני.|She came up with an ingenious solution to the complex problem.
+5|Ponder|להרהר.|He took a long walk to ponder the meaning of life.
+5|Dubious|מפוקפק, מוטל בספק.|I remain highly dubious about the company's promises of instant wealth.
+5|Prejudiced|בעל דעות קדומות.|Some people are still prejudiced against those from different backgrounds.
+5|Estimate|להעריך.|Can you give me a rough estimate of how much the repairs will cost?
+5|Contemplate|לשקול, להרהר.|She stood by the ocean to contemplate her next career move.
+5|To make ends meet|לסגור את החודש (כלכלית).|With the rising prices, many families are struggling to make ends meet.
+5|Turn down|לסרב; להנמיך.|He had to turn down the job offer because the salary was too low.
+5|Hold back|לעכב; להסתיר רגשות.|She tried to hold back her tears during the sad movie.
+5|Give someone a heads up|לעדכן מראש.|Just giving you a heads up that the meeting is moved to 3 PM.
+5|Come across|להיתקל ב-; להצטייר כ-.|He can sometimes come across as arrogant, but he's actually very nice.
+5|Slip up|לטעות.|If you slip up during the performance, just keep playing.
+5|Prop up|לתמוך, להחזיק.|We used a wooden block to prop up the broken table leg.
+5|Wear down|לשחוק, להתיש.|The constant stress of the job began to wear him down.
+5|Make up|להמציא; להשלים (אחרי ריב).|They argued yesterday, but they were quick to make up and apologize.
+5|Burst out|להתפרץ (בצחוק/בכי).|When he told the joke, everyone burst out laughing.
+5|Carry on|להמשיך.|Please carry on with your work while I take this phone call.
+6|Biased|מוטה, משוחד.|The referee was clearly biased against our team.
+6|Presumptuous|יהיר, חוצפן.|It would be presumptuous of me to tell you how to run your business.
+6|Grasp|לתפוס, להבין.|He found it difficult to grasp the complex mathematical concept.
+6|Embrace|לחבק; לקבל מרצון.|We must embrace new technology if we want our company to grow.
+6|Speculate|לשער.|It's useless to speculate about what might happen in the distant future.
+6|Deliberate|מכוון; לדון בכובד ראש.|That wasn't an accident; it was a deliberate attempt to sabotage the project.
+6|Hunch|תחושת בטן.|I have a hunch that our team is going to win tonight.
+6|Conscientious|מצפוני, יסודי.|She is a very conscientious student who never misses an assignment.
+6|Ignorant|בור, חסר ידע.|Many people are completely ignorant of the history of their own city.
+6|Cram|לדחוס (ללמוד למבחן ברגע האחרון).|I had to cram all night because I forgot about the history test.
+6|Sort out|לסדר, לפתור.|Give me a few minutes to sort out this mess on my desk.
+6|Tell off|לנזוף.|The teacher told him off for talking loudly during the exam.
+6|Hands down|ללא ספק.|That was hands down the best movie I have ever seen.
+6|Put up with|להשלים עם, לסבול משהו.|I don't know how she puts up with his constant complaining.
+6|Point out|להצביע על, לציין.|I would like to point out a few errors in your report.
+6|Jump the gun|לפעול בחיפזון, "לקפוץ בראש".|We shouldn't jump the gun and announce the winner before counting all the votes.
+6|Off the hook|לצאת מהתסבוכת/מהאחריות.|You paid your debt, so you are officially off the hook now.
+6|To cost an arm and a leg|עולה הון תועפות.|I'd love to buy that sports car, but it costs an arm and a leg.
+6|To cut corners|לעגל פינות.|If you cut corners while building a house, it might collapse eventually.
+6|Add insult to injury|להוסיף חטא על פשע.|My car broke down, and to add insult to injury, it started pouring rain.
+7|Inattentive|חסר קשב.|The student failed the test because he was inattentive in class.
+7|Act out|להחצין רגשות (בדרך כלל בצורה שלילית).|Children often act out when they feel ignored by their parents.
+7|Deteriorate|להידרדר.|The patient's condition began to deteriorate rapidly overnight.
+7|Revise|לעשות חזרה; לתקן.|You should revise your essay to fix all the spelling mistakes.
+7|Distort|לעוות.|The funhouse mirror will distort your reflection to look funny.
+7|Punctual|דייקן.|Please be punctual; the train leaves exactly at 8:00 AM.
+7|Eternal|נצחי.|Many religions promise eternal life after death.
+7|Obsolete|מיושן, שכבר לא משתמשים בו.|Typewriters have become almost completely obsolete in the modern office.
+7|Bite the bullet|לבלוע את הגלולה המרה.|I hate going to the dentist, but I just have to bite the bullet and go.
+7|Interim|זמני, תקופת ביניים.|She will serve as the interim CEO until a permanent replacement is found.
+7|Break the mold|לשבור את המוסכמות.|His new movie really breaks the mold of traditional Hollywood films.
+7|Reinvent the wheel|להמציא את הגלגל מחדש.|Don't try to reinvent the wheel; just use the software we already have.
+7|Stick to your guns|לעמוד על שלך.|Even when they criticized him, he stuck to his guns and defended his idea.
+7|Tools of the trade|כלי העבודה המקצועיים.|A chef's knives are his most important tools of the trade.
+7|Turn over a new leaf|לפתוח דף חדש.|He decided to turn over a new leaf and start eating healthier.
+7|Beat around the bush|ללכת סחור-סחור.|Stop beating around the bush and just tell me what the problem is.
+7|Break a leg|בהצלחה.|"Break a leg!" she yelled as the actor walked onto the stage.
+7|Call it a day|לסיים את העבודה להיום.|We've been working for ten hours straight; let's call it a day.
+7|Get out of hand|לצאת משליטה.|The party got out of hand, and the neighbors called the police.
+7|Under the weather|לא מרגיש טוב.|I won't be coming to work today because I'm feeling a bit under the weather.
+8|Aversion|סלידה.|He has a strong aversion to eating raw fish.
+8|Contemporary|עכשווי, בן זמננו.|I prefer classic literature over contemporary fiction.
+8|Indulge|להתפנק; להתמכר ל-.|I decided to indulge in a slice of chocolate cake after a long week.
+8|Subsequent|שבא לאחר מכן.|The mistakes were discovered in subsequent investigations.
+8|Bewildered|מבולבל מאוד.|The complex instructions left me feeling completely bewildered.
+8|Prior|קודם.|Do you have any prior experience working in sales?
+8|Pervasive|מופשט, חודר לכל מקום.|The influence of social media is pervasive in our daily lives.
+8|Provisional|זמני, מותנה.|The government formed a provisional committee to handle the crisis.
+8|Timely|בזמן המתאים.|Thank you for your timely response to my urgent email.
+8|Redundant|מיותר, עודף.|Keeping paper records is redundant now that everything is stored in the cloud.
+8|Put off|לדחות.|Don't put off until tomorrow what you can do today.
+8|Bear with|להתאזר בסבלנות כלפי מישהו.|Please bear with me while I try to fix this technical issue.
+8|Break away|להתנתק.|The cyclist managed to break away from the rest of the group and win the race.
+8|Bring about|לגרום ל-, להביא לידי.|The new president promised to bring about major economic changes.
+8|Call off|לבטל.|We had to call off the picnic because of the heavy thunderstorm.
+8|Cut to the chase|להגיע לעיקר.|We don't have much time, so let's cut to the chase and discuss the budget.
+8|Speak of the devil|מדברים על החמור.|Did you see John today? Oh, speak of the devil, here he comes!
+8|Cut somebody some slack|לוותר למישהו, לא להחמיר איתו.|He's new to the job, so you should cut him some slack.
+8|When pigs fly|כשחזירים יעופו (אף פעם).|I'll clean my room when pigs fly!
+8|Back to the drawing board|חזרה לשולחן השרטוטים.|Our plan completely failed, so it's back to the drawing board.
+9|Accelerate|להאיץ.|The car can accelerate from 0 to 60 mph in just five seconds.
+9|Articulate|רהוט; להביע בבירור.|She is a highly articulate speaker who expresses her ideas clearly.
+9|Surpassed|עלה על, עקף.|The company's profits surpassed all our expectations this year.
+9|Gnaw at|לכרסם ב-.|The dog loved to gnaw at the bone for hours.
+9|Plead|להתחנן; לטעון (במשפט).|The lawyer advised him to plead not guilty to the charges.
+9|Dismiss|לפטר; לפסול/לבטל.|The judge decided to dismiss the case due to lack of evidence.
+9|Touch base|ליצור קשר לעדכון קצר.|I just wanted to touch base with you before the weekend to check on our progress.
+9|Inept|חסר כישרון, כושל.|He was completely inept at fixing plumbing issues, causing a massive leak.
+9|Fumble|לגשש; להתבלבל.|I saw him fumble in his pockets trying to find his keys.
+9|Drop in|לקפוץ לביקור.|Feel free to drop in anytime you are in the neighborhood.
+9|Carry out|לבצע.|The soldiers were ordered to carry out the dangerous mission.
+9|Catch up|להשלים פערים.|Let's get coffee soon; we have a lot to catch up on.
+9|The last straw|הקש ששבר את גב הגמל.|When he arrived late for the fifth time, it was the last straw, and he was fired.
+9|Come forward|להתייצב, להציע עזרה/מידע.|The police are asking any witnesses to come forward with information.
+9|See eye to eye|להסכים לחלוטין.|My sister and I don't always see eye to eye on politics.
+9|A hot potato|נושא רגיש/שנוי במחלוקת.|The issue of gun control is a political hot potato in many countries.
+9|To drift apart|להתרחק (חברתית).|After high school, my best friend and I slowly began to drift apart.
+9|Let the cat out of the bag|לגלות סוד.|We wanted the party to be a surprise, but someone let the cat out of the bag.
+9|To grapple with|להתמודד/להיאבק עם.|The city is trying to grapple with the growing problem of homelessness.
+9|To stick up for|להגן על מישהו/משהו.|You should always stick up for your friends when people speak badly of them.
+10|Futile|חסר תועלת.|Trying to convince him to change his mind is a futile effort.
+10|Impeccable|ללא דופי, מושלם.|The famous actor's taste in clothing is absolutely impeccable.
+10|Spill the beans|לגלות סוד.|Come on, spill the beans! What did you get her for her birthday?
+10|Through thick and thin|באש ובמים.|A true friend will stand by your side through thick and thin.
+10|Pernicious|מזיק מאוד, הרסני.|Smoking has a pernicious effect on your lung capacity over time.
+10|Route|מסלול.|We took a scenic route through the mountains instead of the highway.
+10|Pedestrian|הולך רגל; משעמם/בנאלי.|The driver stopped at the crosswalk to let the pedestrian pass.
+10|Deviate|לסטות.|Please do not deviate from the script during your presentation.
+10|Discrepancy|אי-התאמה, פער.|There is a large discrepancy between the reported expenses and the actual receipts.
+10|Illegible|לא קריא.|The doctor's handwriting on the prescription was completely illegible.
+10|Cut off|לנתק.|The storm was so bad that it cut off the electricity in our neighborhood.
+10|Draw in|למשוך פנימה/לערב.|The colorful advertisements are designed to draw in new customers.
+10|Draw out|להאריך/למשוך זמן.|The speaker tried to draw out his speech because the next presenter was late.
+10|Rack up|לצבור (נקודות/חובות).|If you use your credit card too much, you will rack up a huge debt.
+10|Drop out|לנשור (מלימודים).|He decided to drop out of college and start his own business instead.
+10|A last resort|מוצא אחרון.|We should only ask the bank for a loan as a last resort.
+10|To bite off more than you can chew|לקפוץ מעל הפופיק.|By taking three jobs at once, he really bit off more than he could chew.
+10|Blessing in disguise|מעז יצא מתוק.|Losing that job was a blessing in disguise because it pushed me to open my own business.
+10|To give the benefit of the doubt|ליהנות מהספק.|I'll give him the benefit of the doubt and assume he just forgot our meeting.
+10|To take it with a grain of salt|לקחת בעירבון מוגבל.|Everything written in that gossip magazine should be taken with a grain of salt.`;
+
+        // Parse Data
         const ALL_WORDS = rawData.trim().split('\n')
             .filter(line => line.includes('|'))
             .map((line, i) => {
                 const p = line.split('|');
-                return { id: i, week: parseInt(p[0].trim()), en: p[1].trim(), he: p[2].trim() };
+                return { 
+                    id: i, 
+                    week: parseInt(p[0].trim()), 
+                    en: p[1].trim(), 
+                    he: p[2].trim(),
+                    example: p[3] ? p[3].trim() : ''
+                };
             });
 
         let state = {
@@ -424,9 +472,10 @@
         function renderFlashcards() {
             const word = state.filteredWords[state.index];
             document.getElementById('fc-counter').textContent = `כרטיסיה ${state.index + 1} מתוך ${state.filteredWords.length}`;
-            document.getElementById('fc-en').textContent = word.en;
+            document.getElementById('fc-en-text').textContent = word.en;
             document.getElementById('fc-he').textContent = word.he;
             document.getElementById('fc-week').textContent = `שבוע ${word.week}`;
+            document.getElementById('fc-example').textContent = word.example;
             
             state.flipped = false;
             document.getElementById('fc-card').classList.remove('rotate-y-180');
@@ -470,7 +519,7 @@
             state.quizOptions = options;
             state.isAnswerChecked = false;
 
-            document.getElementById('quiz-en').textContent = word.en;
+            document.getElementById('quiz-en-text').textContent = word.en;
             document.getElementById('quiz-counter').textContent = `שאלה ${state.index + 1} מתוך ${state.filteredWords.length}`;
             document.getElementById('quiz-score').textContent = `ניקוד: ${state.score}`;
             document.getElementById('quiz-next-btn').classList.add('hidden');
@@ -541,12 +590,22 @@
         function renderList() {
             const tbody = document.getElementById('list-body');
             tbody.innerHTML = '';
-            state.filteredWords.forEach(word => {
+            state.filteredWords.forEach((word, idx) => {
+                // We use a specific ID to extract text for the speech API
+                const rowEnId = `list-en-${idx}`;
                 tbody.innerHTML += `
                     <tr class="hover:bg-blue-50/50 transition-colors border-b border-gray-50 last:border-0">
-                        <td class="py-3 px-4 md:py-4 md:px-6 font-medium text-gray-900 text-sm md:text-base break-words min-w-[120px]" dir="ltr">${word.en}</td>
-                        <td class="py-3 px-4 md:py-4 md:px-6 text-gray-700 text-sm md:text-base break-words min-w-[150px]">${word.he}</td>
-                        <td class="py-3 px-4 md:py-4 md:px-6 text-center text-gray-500 text-xs md:text-sm whitespace-nowrap">${word.week}</td>
+                        <td class="py-3 px-4 md:py-4 md:px-6 min-w-[200px]" dir="ltr">
+                            <div class="flex items-center gap-2 mb-1">
+                                <button onclick="playAudio(event, '${rowEnId}', true)" class="p-1.5 bg-gray-100 text-blue-600 rounded-full hover:bg-gray-200 transition-colors shrink-0" title="השמע מילה">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+                                </button>
+                                <span class="font-bold text-gray-900 text-sm md:text-base break-words" id="${rowEnId}">${word.en}</span>
+                            </div>
+                            <div class="text-xs md:text-sm text-gray-500 italic ml-8">${word.example}</div>
+                        </td>
+                        <td class="py-3 px-4 md:py-4 md:px-6 text-gray-700 text-sm md:text-base break-words min-w-[150px] align-top mt-1">${word.he}</td>
+                        <td class="py-3 px-4 md:py-4 md:px-6 text-center text-gray-500 text-xs md:text-sm whitespace-nowrap align-top mt-1">${word.week}</td>
                     </tr>
                 `;
             });
