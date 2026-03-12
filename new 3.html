@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>תרגול אוצר מילים - מתקדמים ב'</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .perspective-1000 { perspective: 1000px; }
+        .transform-style-3d { transform-style: preserve-3d; transition: transform 0.5s; }
+        .backface-hidden { backface-visibility: hidden; }
+        .rotate-y-180 { transform: rotateY(180deg); }
+        body { background-color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
+        
+        /* Hide scrollbar for horizontal scrolling menus */
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="bg-white border-b border-gray-200 sticky top-0 z-10 shadow-sm">
+        <div class="max-w-6xl mx-auto px-4 py-3 md:py-4 flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-4">
+            <div class="flex items-center justify-center md:justify-start gap-2 text-blue-600">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+                <h1 class="text-xl md:text-2xl font-bold tracking-tight">Advanced B Vocab</h1>
+            </div>
+
+            <!-- Mode Selector -->
+            <div class="flex w-full md:w-auto bg-gray-100 p-1 rounded-xl">
+                <button onclick="setMode('flashcards')" id="btn-mode-flashcards" class="flex-1 md:flex-none justify-center flex items-center gap-1 md:gap-2 px-2 md:px-4 py-2 rounded-lg text-xs md:text-sm font-medium transition-colors bg-white shadow-sm text-blue-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+                    כרטיסיות
+                </button>
+                <button onclick="setMode('quiz')" id="btn-mode-quiz" class="flex-1 md:flex-none justify-center flex items-center gap-1 md:gap-2 px-2 md:px-4 py-2 rounded-lg text-xs md:text-sm font-medium transition-colors text-gray-600 hover:text-gray-900">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
+                    תרגול
+                </button>
+                <button onclick="setMode('list')" id="btn-mode-list" class="flex-1 md:flex-none justify-center flex items-center gap-1 md:gap-2 px-2 md:px-4 py-2 rounded-lg text-xs md:text-sm font-medium transition-colors text-gray-600 hover:text-gray-900">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                    רשימה
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 py-6 md:py-8">
+        <!-- Week Selector -->
+        <div class="mb-6 md:mb-8 w-full overflow-hidden">
+            <h3 class="text-xs md:text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2 md:mb-3 px-1">בחר שבוע לתרגול:</h3>
+            <!-- Scrollable container for mobile -->
+            <div class="flex overflow-x-auto gap-2 pb-2 hide-scrollbar w-full" id="week-buttons">
+                <!-- Injected via JS -->
+            </div>
+        </div>
+
+        <!-- Views -->
+        <div id="view-flashcards" class="hidden">
+            <div class="flex flex-col items-center w-full max-w-2xl mx-auto mt-4 md:mt-8">
+                <div class="text-xs md:text-sm text-gray-500 mb-3 md:mb-4 font-medium" id="fc-counter">כרטיסיה 1 מתוך 200</div>
+                
+                <div class="relative w-full h-64 md:h-80 cursor-pointer perspective-1000" onclick="toggleFlip()">
+                    <div id="fc-card" class="w-full h-full transform-style-3d shadow-lg hover:shadow-xl transition-shadow rounded-2xl">
+                        <div class="absolute w-full h-full backface-hidden bg-white rounded-2xl border border-gray-100 flex flex-col items-center justify-center p-6 md:p-8 text-center">
+                            <span class="text-gray-400 text-xs md:text-sm absolute top-3 md:top-4 left-4">לחץ כדי להפוך</span>
+                            <h2 id="fc-en" class="text-3xl md:text-5xl font-bold text-gray-800 break-words w-full px-2" dir="ltr">Word</h2>
+                        </div>
+                        <div class="absolute w-full h-full backface-hidden bg-blue-50 rounded-2xl border border-blue-100 flex flex-col items-center justify-center p-6 md:p-8 text-center rotate-y-180">
+                            <span class="text-blue-300 text-xs md:text-sm absolute top-3 md:top-4 right-4">לחץ כדי להפוך</span>
+                            <h2 id="fc-he" class="text-2xl md:text-4xl font-bold text-blue-900 break-words w-full px-2" dir="rtl">Translation</h2>
+                            <span id="fc-week" class="mt-4 md:mt-6 px-3 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">שבוע 1</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-center gap-6 mt-6 md:mt-8 w-full" dir="ltr">
+                    <button onclick="prevCard()" class="p-3 md:p-4 rounded-full bg-white shadow hover:bg-gray-50 transition-colors active:scale-95">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                    </button>
+                    <button onclick="restartFC()" class="p-3 rounded-full bg-white shadow hover:bg-gray-50 transition-colors text-gray-400 active:scale-95">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                    </button>
+                    <button onclick="nextCard()" class="p-3 md:p-4 rounded-full bg-white shadow hover:bg-gray-50 transition-colors active:scale-95">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-quiz" class="hidden">
+            <div class="flex flex-col items-center w-full max-w-2xl mx-auto mt-4 md:mt-8">
+                <div class="flex justify-between w-full text-xs md:text-sm text-gray-500 mb-3 md:mb-4 px-2 font-medium">
+                     <span id="quiz-counter">שאלה 1 מתוך 200</span>
+                     <span id="quiz-score">ניקוד: 0</span>
+                </div>
+
+                <div class="w-full bg-white rounded-2xl shadow-md p-6 md:p-8 text-center border border-gray-100 mb-4 md:mb-6">
+                    <h2 id="quiz-en" class="text-3xl md:text-4xl font-bold text-gray-800 break-words" dir="ltr">Word</h2>
+                </div>
+
+                <div id="quiz-options" class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 w-full">
+                    <!-- Buttons -->
+                </div>
+
+                <button id="quiz-next-btn" onclick="nextQuiz()" class="hidden mt-6 md:mt-8 w-full md:w-auto px-8 py-3 bg-blue-600 text-white font-bold rounded-xl shadow hover:bg-blue-700 transition-colors active:scale-95">
+                    שאלה הבאה
+                </button>
+                
+                <div id="quiz-summary" class="hidden mt-6 p-6 bg-blue-50 border border-blue-200 rounded-xl text-center w-full text-blue-900">
+                     <h3 class="text-xl md:text-2xl font-bold mb-2">כל הכבוד! סיימת את התרגול.</h3>
+                     <p id="quiz-summary-score"></p>
+                     <button onclick="restartQuiz()" class="mt-4 text-blue-600 font-semibold hover:underline p-2">תרגל שוב</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-list" class="hidden">
+            <div class="w-full max-w-4xl mx-auto mt-4 md:mt-8 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="overflow-x-auto w-full">
+                    <table class="w-full text-right" dir="rtl">
+                        <thead class="bg-gray-50 border-b border-gray-100 text-gray-600">
+                            <tr>
+                                <th class="py-3 px-4 md:py-4 md:px-6 font-semibold text-sm md:text-base min-w-[120px]">מילה באנגלית</th>
+                                <th class="py-3 px-4 md:py-4 md:px-6 font-semibold text-sm md:text-base min-w-[150px]">פירוש בעברית</th>
+                                <th class="py-3 px-4 md:py-4 md:px-6 font-semibold text-center text-sm md:text-base w-20 md:w-24 whitespace-nowrap">שבוע</th>
+                            </tr>
+                        </thead>
+                        <tbody id="list-body" class="divide-y divide-gray-100">
+                            <!-- List -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const rawData = `1|Abrupt|פתאומי; בוטה.
+1|Capricious|גחמני, קפריזי.
+1|Allege|לטעון (בדרך כלל ללא הוכחה).
+1|Meticulous|קפדני מאוד.
+1|Nebulous|מעורפל.
+1|Rant|להתרעם, "לחפור" בכעס.
+1|Assert|לעמוד על שלך, להצהיר בתוקף.
+1|Rancor|טינה, איבה.
+1|Blunt|בוטה, ישיר מאוד.
+1|Tenacious|עקשן, דבק במטרה.
+1|Narrow down|לצמצם אפשרויות.
+1|Flick through|לדפדף במהירות.
+1|Stumble across|להיתקל במקרה.
+1|Brush up on|לרענן ידע.
+1|Come around to|להשתכנע בסוף.
+1|Bark up the wrong tree|לחפש במקום הלא נכון.
+1|Not have a leg to stand on|אין לו על מה להסתמך.
+1|Not to see the wood for the trees|מרוב עצים לא רואים את היער.
+1|Ring a bell|נשמע מוכר.
+1|Split hairs|להתעסק בקטנות.
+2|Cogent|משכנע, ענייני.
+2|Ambiguous|דו-משמעי, מעורפל.
+2|Ubiquitous|נמצא בכל מקום.
+2|Boast|להתרברב.
+2|Denounce|להוקיע, לגנות.
+2|Convey|להעביר (מסר/מידע).
+2|Ostensible|לכאורה, כביכול.
+2|Contradict|לסתור.
+2|Novel|חדשני.
+2|Endure|לשאת, להחזיק מעמד.
+2|Come up with|להמציא רעיון/פתרון.
+2|Mull over|להרהר, לשקול.
+2|Wear off|להתפוגג, להיחלש.
+2|Crop up|לצוץ פתאום.
+2|Dive in|לקפוץ למים, להתחיל בהתלהבות.
+2|Take stock of|לעשות הערכת מצב.
+2|At the drop of a hat|ללא היסוס, מיד.
+2|By the skin of your teeth|בקושי רב.
+2|In the nick of time|ברגע האחרון ממש.
+2|Once in a blue moon|לעיתים רחוקות מאוד.
+3|Inscrutable|בלתי ניתן לפענוח.
+3|Staggering|מדהים, מטלטל.
+3|Ephemeral|חולף, זמני.
+3|Tolerant|סובלני.
+3|Myriad|אינספור, המון.
+3|Nefarious|מרושע.
+3|Salient|בולט, עיקרי.
+3|Unsurmountable|שלא ניתן להתגבר עליו.
+3|Disparage|לזלזל.
+3|Apprehensive|חושש, חרד.
+3|Kick off|להתחיל, להזניק.
+3|Knock off|לסיים יום עבודה.
+3|Knuckle down|להתחיל לעבוד ברצינות.
+3|Chip in|לתרום, להשתתף במאמץ.
+3|Lie ahead|מצפה לנו בעתיד.
+3|On the spur of the moment|בדחף של הרגע.
+3|Hit the nail on the head|לקלוע בול.
+3|Follow your nose|לסמוך על האינסטינקטים.
+3|Lose your bearings|לאבד כיוון/צפון.
+3|Off the beaten track|מחוץ למסלול המוכר.
+4|Disgruntled|ממורמר, לא מרוצה.
+4|Intransigent|בלתי מתפשר.
+4|Get the ball rolling|להניע תהליך.
+4|Accountable|אחראי (דיווחִי).
+4|Persist|להתמיד.
+4|Amend|לתקן, לשפר (חוק/טקסט).
+4|Substitute|להחליף; תחליף.
+4|Refine|ללטש, לשכלל.
+4|Sustain|לשמר, לתמוך.
+4|Riveting|מרתק.
+4|Set out|לצאת לדרך; להציג תוכנית.
+4|Take on|לקחת על עצמך (משימה/אחריות).
+4|Wind down|להירגע, להוריד הילוך.
+4|Creep up on|להתגנב אל.
+4|Go astray|ללכת לאיבוד; לסטות מהדרך.
+4|Stop dead in your tracks|לעצור במקום בפתאומיות.
+4|Keep posted|לעדכן באופן שוטף.
+4|Speak volumes|אומר דרשני, מעיד על הרבה.
+4|Throw in the towel|להרים ידיים, לוותר.
+4|Draw the short straw|להפסיד/לקבל את המשימה הגרועה.
+5|Accumulation|הצטברות.
+5|Plausible|סביר, מתקבל על הדעת.
+5|Discriminate|להפלות; להבחין בין.
+5|Ingenious|גאוני.
+5|Ponder|להרהר.
+5|Dubious|מפוקפק, מוטל בספק.
+5|Prejudiced|בעל דעות קדומות.
+5|Estimate|להעריך.
+5|Contemplate|לשקול, להרהר.
+5|To make ends meet|לסגור את החודש (כלכלית).
+5|Turn down|לסרב; להנמיך.
+5|Hold back|לעכב; להסתיר רגשות.
+5|Give someone a heads up|לעדכן מראש.
+5|Come across|להיתקל ב-; להצטייר כ-.
+5|Slip up|לטעות.
+5|Prop up|לתמוך, להחזיק.
+5|Wear down|לשחוק, להתיש.
+5|Make up|להמציא; להשלים (אחרי ריב).
+5|Burst out|להתפרץ (בצחוק/בכי).
+5|Carry on|להמשיך.
+6|Biased|מוטה, משוחד.
+6|Presumptuous|יהיר, חוצפן.
+6|Grasp|לתפוס, להבין.
+6|Embrace|לחבק; לקבל מרצון.
+6|Speculate|לשער.
+6|Deliberate|מכוון; לדון בכובד ראש.
+6|Hunch|תחושת בטן.
+6|Conscientious|מצפוני, יסודי.
+6|Ignorant|בור, חסר ידע.
+6|Cram|לדחוס (ללמוד למבחן ברגע האחרון).
+6|Sort out|לסדר, לפתור.
+6|Tell off|לנזוף.
+6|Hands down|ללא ספק.
+6|Put up with|להשלים עם, לסבול משהו.
+6|Point out|להצביע על, לציין.
+6|Jump the gun|לפעול בחיפזון, "לקפוץ בראש".
+6|Off the hook|לצאת מהתסבוכת/מהאחריות.
+6|To cost an arm and a leg|עולה הון תועפות.
+6|To cut corners|לעגל פינות.
+6|Add insult to injury|להוסיף חטא על פשע.
+7|Inattentive|חסר קשב.
+7|Act out|להחצין רגשות (בדרך כלל בצורה שלילית).
+7|Deteriorate|להידרדר.
+7|Revise|לעשות חזרה; לתקן.
+7|Distort|לעוות.
+7|Punctual|דייקן.
+7|Eternal|נצחי.
+7|Obsolete|מיושן, שכבר לא משתמשים בו.
+7|Bite the bullet|לבלוע את הגלולה המרה.
+7|Interim|זמני, תקופת ביניים.
+7|Break the mold|לשבור את המוסכמות.
+7|Reinvent the wheel|להמציא את הגלגל מחדש.
+7|Stick to your guns|לעמוד על שלך.
+7|Tools of the trade|כלי העבודה המקצועיים.
+7|Turn over a new leaf|לפתוח דף חדש.
+7|Beat around the bush|ללכת סחור-סחור.
+7|Break a leg|בהצלחה.
+7|Call it a day|לסיים את העבודה להיום.
+7|Get out of hand|לצאת משליטה.
+7|Under the weather|לא מרגיש טוב.
+8|Aversion|סלידה.
+8|Contemporary|עכשווי, בן זמננו.
+8|Indulge|להתפנק; להתמכר ל-.
+8|Subsequent|שבא לאחר מכן.
+8|Bewildered|מבולבל מאוד.
+8|Prior|קודם.
+8|Pervasive|מופשט, חודר לכל מקום.
+8|Provisional|זמני, מותנה.
+8|Timely|בזמן המתאים.
+8|Redundant|מיותר, עודף.
+8|Put off|לדחות.
+8|Bear with|להתאזר בסבלנות כלפי מישהו.
+8|Break away|להתנתק.
+8|Bring about|לגרום ל-, להביא לידי.
+8|Call off|לבטל.
+8|Cut to the chase|להגיע לעיקר.
+8|Speak of the devil|מדברים על החמור.
+8|Cut somebody some slack|לוותר למישהו, לא להחמיר איתו.
+8|When pigs fly|כשחזירים יעופו (אף פעם).
+8|Back to the drawing board|חזרה לשולחן השרטוטים.
+9|Accelerate|להאיץ.
+9|Articulate|רהוט; להביע בבירור.
+9|Surpassed|עלה על, עקף.
+9|Gnaw at|לכרסם ב-.
+9|Plead|להתחנן; לטעון (במשפט).
+9|Dismiss|לפטר; לפסול/לבטל.
+9|Touch base|ליצור קשר לעדכון קצר.
+9|Inept|חסר כישרון, כושל.
+9|Fumble|לגשש; להתבלבל.
+9|Drop in|לקפוץ לביקור.
+9|Carry out|לבצע.
+9|Catch up|להשלים פערים.
+9|The last straw|הקש ששבר את גב הגמל.
+9|Come forward|להתייצב, להציע עזרה/מידע.
+9|See eye to eye|להסכים לחלוטין.
+9|A hot potato|נושא רגיש/שנוי במחלוקת.
+9|To drift apart|להתרחק (חברתית).
+9|Let the cat out of the bag|לגלות סוד.
+9|To grapple with|להתמודד/להיאבק עם.
+9|To stick up for|להגן על מישהו/משהו.
+10|Futile|חסר תועלת.
+10|Impeccable|ללא דופי, מושלם.
+10|Spill the beans|לגלות סוד.
+10|Through thick and thin|באש ובמים.
+10|Pernicious|מזיק מאוד, הרסני.
+10|Route|מסלול.
+10|Pedestrian|הולך רגל; משעמם/בנאלי.
+10|Deviate|לסטות.
+10|Discrepancy|אי-התאמה, פער.
+10|Illegible|לא קריא.
+10|Cut off|לנתק.
+10|Draw in|למשוך פנימה/לערב.
+10|Draw out|להאריך/למשוך זמן.
+10|Rack up|לצבור (נקודות/חובות).
+10|Drop out|לנשור (מלימודים).
+10|A last resort|מוצא אחרון.
+10|To bite off more than you can chew|לקפוץ מעל הפופיק.
+10|Blessing in disguise|מעז יצא מתוק.
+10|To give the benefit of the doubt|ליהנות מהספק.
+10|To take it with a grain of salt|לקחת בעירבון מוגבל.`;
+
+        const ALL_WORDS = rawData.trim().split('\n')
+            .filter(line => line.includes('|'))
+            .map((line, i) => {
+                const p = line.split('|');
+                return { id: i, week: parseInt(p[0].trim()), en: p[1].trim(), he: p[2].trim() };
+            });
+
+        let state = {
+            mode: 'flashcards',
+            week: 'all',
+            index: 0,
+            score: 0,
+            flipped: false,
+            filteredWords: ALL_WORDS,
+            quizOptions: [],
+            isAnswerChecked: false
+        };
+
+        // --- Init ---
+        function init() {
+            renderWeekButtons();
+            updateView();
+        }
+
+        function renderWeekButtons() {
+            const container = document.getElementById('week-buttons');
+            container.innerHTML = `<button onclick="setWeek('all')" id="btn-week-all" class="px-4 md:px-5 py-2 rounded-full text-xs md:text-sm font-medium transition-colors border bg-blue-600 text-white border-blue-600 shadow-md whitespace-nowrap shrink-0">כל השבועות (${ALL_WORDS.length})</button>`;
+            for(let i=1; i<=10; i++) {
+                container.innerHTML += `<button onclick="setWeek(${i})" id="btn-week-${i}" class="px-4 md:px-5 py-2 rounded-full text-xs md:text-sm font-medium transition-colors border bg-white text-gray-700 border-gray-200 hover:border-blue-300 hover:bg-blue-50 whitespace-nowrap shrink-0">שבוע ${i}</button>`;
+            }
+        }
+
+        // --- Navigation ---
+        function setMode(newMode) {
+            state.mode = newMode;
+            state.index = 0;
+            state.score = 0;
+            state.flipped = false;
+            
+            // Update Buttons UI
+            ['flashcards', 'quiz', 'list'].forEach(m => {
+                const btn = document.getElementById(`btn-mode-${m}`);
+                if(m === newMode) {
+                    btn.className = btn.className.replace('text-gray-600 hover:text-gray-900', 'bg-white shadow-sm text-blue-600');
+                } else {
+                    btn.className = btn.className.replace('bg-white shadow-sm text-blue-600', 'text-gray-600 hover:text-gray-900');
+                }
+            });
+
+            updateView();
+        }
+
+        function setWeek(newWeek) {
+            state.week = newWeek;
+            if (newWeek === 'all') state.filteredWords = ALL_WORDS;
+            else state.filteredWords = ALL_WORDS.filter(w => w.week === newWeek);
+            
+            state.index = 0;
+            state.score = 0;
+            state.flipped = false;
+
+            // Update Buttons UI
+            document.querySelectorAll('#week-buttons button').forEach(btn => {
+                btn.className = "px-4 md:px-5 py-2 rounded-full text-xs md:text-sm font-medium transition-colors border bg-white text-gray-700 border-gray-200 hover:border-blue-300 hover:bg-blue-50 whitespace-nowrap shrink-0";
+            });
+            const activeBtn = document.getElementById(`btn-week-${newWeek}`);
+            activeBtn.className = "px-4 md:px-5 py-2 rounded-full text-xs md:text-sm font-medium transition-colors border bg-blue-600 text-white border-blue-600 shadow-md whitespace-nowrap shrink-0";
+
+            updateView();
+        }
+
+        function updateView() {
+            document.getElementById('view-flashcards').classList.add('hidden');
+            document.getElementById('view-quiz').classList.add('hidden');
+            document.getElementById('view-list').classList.add('hidden');
+            
+            document.getElementById(`view-${state.mode}`).classList.remove('hidden');
+
+            if (state.mode === 'flashcards') renderFlashcards();
+            if (state.mode === 'quiz') generateQuiz();
+            if (state.mode === 'list') renderList();
+        }
+
+        // --- Flashcards ---
+        function renderFlashcards() {
+            const word = state.filteredWords[state.index];
+            document.getElementById('fc-counter').textContent = `כרטיסיה ${state.index + 1} מתוך ${state.filteredWords.length}`;
+            document.getElementById('fc-en').textContent = word.en;
+            document.getElementById('fc-he').textContent = word.he;
+            document.getElementById('fc-week').textContent = `שבוע ${word.week}`;
+            
+            state.flipped = false;
+            document.getElementById('fc-card').classList.remove('rotate-y-180');
+        }
+
+        function toggleFlip() {
+            state.flipped = !state.flipped;
+            if(state.flipped) document.getElementById('fc-card').classList.add('rotate-y-180');
+            else document.getElementById('fc-card').classList.remove('rotate-y-180');
+        }
+
+        function nextCard() {
+            if (state.index < state.filteredWords.length - 1) {
+                state.index++;
+                renderFlashcards();
+            }
+        }
+
+        function prevCard() {
+            if (state.index > 0) {
+                state.index--;
+                renderFlashcards();
+            }
+        }
+        
+        function restartFC() {
+            state.index = 0;
+            renderFlashcards();
+        }
+
+        // --- Quiz ---
+        function generateQuiz() {
+            const word = state.filteredWords[state.index];
+            const options = [word];
+            
+            const wrongOptions = ALL_WORDS.filter(w => w.id !== word.id);
+            wrongOptions.sort(() => 0.5 - Math.random());
+            options.push(wrongOptions[0], wrongOptions[1], wrongOptions[2]);
+            options.sort(() => 0.5 - Math.random());
+            
+            state.quizOptions = options;
+            state.isAnswerChecked = false;
+
+            document.getElementById('quiz-en').textContent = word.en;
+            document.getElementById('quiz-counter').textContent = `שאלה ${state.index + 1} מתוך ${state.filteredWords.length}`;
+            document.getElementById('quiz-score').textContent = `ניקוד: ${state.score}`;
+            document.getElementById('quiz-next-btn').classList.add('hidden');
+            document.getElementById('quiz-summary').classList.add('hidden');
+
+            const optionsContainer = document.getElementById('quiz-options');
+            optionsContainer.innerHTML = '';
+
+            options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "p-3 md:p-4 rounded-xl border-2 text-sm md:text-lg font-medium transition-all shadow-sm hover:shadow-md bg-white border-gray-200 hover:border-blue-400 text-gray-700 flex justify-between items-center text-right";
+                btn.innerHTML = `<span>${opt.he}</span><span id="quiz-icon-${idx}" class="font-bold mr-2"></span>`;
+                btn.onclick = () => selectAnswer(opt, btn, idx);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function selectAnswer(selectedOpt, btnElement, idx) {
+            if(state.isAnswerChecked) return;
+            state.isAnswerChecked = true;
+
+            const correctWord = state.filteredWords[state.index];
+            if(selectedOpt.id === correctWord.id) {
+                state.score++;
+                document.getElementById('quiz-score').textContent = `ניקוד: ${state.score}`;
+            }
+
+            const allBtns = document.getElementById('quiz-options').children;
+            state.quizOptions.forEach((opt, i) => {
+                const currentBtn = allBtns[i];
+                currentBtn.className = "p-3 md:p-4 rounded-xl border-2 text-sm md:text-lg font-medium transition-all shadow-sm flex justify-between items-center text-right ";
+                
+                if (opt.id === correctWord.id) {
+                    currentBtn.className += "bg-green-50 border-green-500 text-green-800";
+                    document.getElementById(`quiz-icon-${i}`).textContent = '✓';
+                } else if (opt.id === selectedOpt.id) {
+                    currentBtn.className += "bg-red-50 border-red-500 text-red-800";
+                    document.getElementById(`quiz-icon-${i}`).textContent = '✗';
+                } else {
+                    currentBtn.className += "bg-gray-50 border-gray-200 text-gray-400 opacity-50";
+                }
+            });
+
+            if (state.index === state.filteredWords.length - 1) {
+                document.getElementById('quiz-summary').classList.remove('hidden');
+                document.getElementById('quiz-summary-score').textContent = `הציון שלך: ${state.score} מתוך ${state.filteredWords.length}`;
+            } else {
+                const nextBtn = document.getElementById('quiz-next-btn');
+                nextBtn.classList.remove('hidden');
+                nextBtn.textContent = (state.index === state.filteredWords.length - 2) ? 'סיום תרגול' : 'שאלה הבאה';
+            }
+        }
+
+        function nextQuiz() {
+            if (state.index < state.filteredWords.length - 1) {
+                state.index++;
+                generateQuiz();
+            }
+        }
+
+        function restartQuiz() {
+            state.index = 0;
+            state.score = 0;
+            generateQuiz();
+        }
+
+        // --- List ---
+        function renderList() {
+            const tbody = document.getElementById('list-body');
+            tbody.innerHTML = '';
+            state.filteredWords.forEach(word => {
+                tbody.innerHTML += `
+                    <tr class="hover:bg-blue-50/50 transition-colors border-b border-gray-50 last:border-0">
+                        <td class="py-3 px-4 md:py-4 md:px-6 font-medium text-gray-900 text-sm md:text-base break-words min-w-[120px]" dir="ltr">${word.en}</td>
+                        <td class="py-3 px-4 md:py-4 md:px-6 text-gray-700 text-sm md:text-base break-words min-w-[150px]">${word.he}</td>
+                        <td class="py-3 px-4 md:py-4 md:px-6 text-center text-gray-500 text-xs md:text-sm whitespace-nowrap">${word.week}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        // Start
+        init();
+    </script>
+</body>
+</html>
