@@ -442,7 +442,7 @@
 
         let state = {
             mode: 'flashcards',
-            week: 'all',
+            selectedWeeks: [], // מערך לשמירת השבועות שנבחרו. ריק = הכל
             index: 0,
             score: 0,
             flipped: false,
@@ -460,10 +460,11 @@
 
         function renderWeekButtons() {
             const container = document.getElementById('week-buttons');
-            container.innerHTML = `<button onclick="setWeek('all')" id="btn-week-all" class="px-4 md:px-5 py-2 rounded-full text-xs md:text-sm font-medium transition-colors border bg-emerald-600 text-white border-emerald-600 shadow-md whitespace-nowrap shrink-0">כל השבועות (${ALL_WORDS.length})</button>`;
+            container.innerHTML = `<button onclick="toggleWeek('all')" id="btn-week-all" class="px-4 md:px-5 py-2 rounded-full text-xs md:text-sm font-medium transition-colors border whitespace-nowrap shrink-0">כל השבועות (${ALL_WORDS.length})</button>`;
             for(let i=1; i<=10; i++) {
-                container.innerHTML += `<button onclick="setWeek(${i})" id="btn-week-${i}" class="px-4 md:px-5 py-2 rounded-full text-xs md:text-sm font-medium transition-colors border bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:border-emerald-300 dark:hover:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/50 whitespace-nowrap shrink-0">שבוע ${i}</button>`;
+                container.innerHTML += `<button onclick="toggleWeek(${i})" id="btn-week-${i}" class="px-4 md:px-5 py-2 rounded-full text-xs md:text-sm font-medium transition-colors border whitespace-nowrap shrink-0">שבוע ${i}</button>`;
             }
+            updateWeekButtonsUI();
         }
 
         // --- Navigation ---
@@ -486,23 +487,60 @@
             updateView();
         }
 
-        function setWeek(newWeek) {
-            state.week = newWeek;
-            if (newWeek === 'all') state.filteredWords = ALL_WORDS;
-            else state.filteredWords = ALL_WORDS.filter(w => w.week === newWeek);
+        function toggleWeek(weekClicked) {
+            if (weekClicked === 'all') {
+                state.selectedWeeks = [];
+            } else {
+                const idx = state.selectedWeeks.indexOf(weekClicked);
+                if (idx > -1) {
+                    // אם השבוע כבר נבחר, נסיר אותו מהרשימה
+                    state.selectedWeeks.splice(idx, 1);
+                } else {
+                    // אם הוא לא נבחר, נוסיף אותו
+                    state.selectedWeeks.push(weekClicked);
+                }
+                
+                // אם בחרנו ידנית את כל 10 השבועות, נאפס למצב "הכל"
+                if (state.selectedWeeks.length === 10) {
+                    state.selectedWeeks = [];
+                }
+            }
+            
+            // סינון המילים: אם המערך ריק נציג הכל, אחרת נציג רק את השבועות המסומנים
+            if (state.selectedWeeks.length === 0) {
+                state.filteredWords = ALL_WORDS;
+            } else {
+                state.filteredWords = ALL_WORDS.filter(w => state.selectedWeeks.includes(w.week));
+            }
             
             state.index = 0;
             state.score = 0;
             state.flipped = false;
 
-            // Update Buttons UI
-            document.querySelectorAll('#week-buttons button').forEach(btn => {
-                btn.className = "px-4 md:px-5 py-2 rounded-full text-xs md:text-sm font-medium transition-colors border bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:border-emerald-300 dark:hover:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/50 whitespace-nowrap shrink-0";
-            });
-            const activeBtn = document.getElementById(`btn-week-${newWeek}`);
-            activeBtn.className = "px-4 md:px-5 py-2 rounded-full text-xs md:text-sm font-medium transition-colors border bg-emerald-600 text-white border-emerald-600 shadow-md whitespace-nowrap shrink-0";
-
+            updateWeekButtonsUI();
             updateView();
+        }
+
+        function updateWeekButtonsUI() {
+            const isAll = state.selectedWeeks.length === 0;
+            
+            // עדכון כפתור "כל השבועות"
+            const allBtn = document.getElementById('btn-week-all');
+            if (isAll) {
+                allBtn.className = "px-4 md:px-5 py-2 rounded-full text-xs md:text-sm font-medium transition-colors border bg-emerald-600 text-white border-emerald-600 shadow-md whitespace-nowrap shrink-0";
+            } else {
+                allBtn.className = "px-4 md:px-5 py-2 rounded-full text-xs md:text-sm font-medium transition-colors border bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:border-emerald-300 dark:hover:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/50 whitespace-nowrap shrink-0";
+            }
+            
+            // עדכון שאר הכפתורים (שבועות 1-10)
+            for(let i=1; i<=10; i++) {
+                const btn = document.getElementById(`btn-week-${i}`);
+                if (state.selectedWeeks.includes(i)) {
+                    btn.className = "px-4 md:px-5 py-2 rounded-full text-xs md:text-sm font-medium transition-colors border bg-emerald-600 text-white border-emerald-600 shadow-md whitespace-nowrap shrink-0";
+                } else {
+                    btn.className = "px-4 md:px-5 py-2 rounded-full text-xs md:text-sm font-medium transition-colors border bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:border-emerald-300 dark:hover:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/50 whitespace-nowrap shrink-0";
+                }
+            }
         }
 
         function updateView() {
